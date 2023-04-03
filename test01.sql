@@ -20,7 +20,19 @@ insert into `user`(`name`, pwd, birth, email) values('name4', 'pwd4', '2002-12-1
 # Insert Statement 
 INSERT INTO `test01`.`user`(`name`,`pwd`,`birth`,`email`)VALUES('name10','pwd2','2000-12-25','email10');
 
-select * from `user`;   # 테이블 내용 확인
+select * from `user`;   # 테이블 모든 데이터 조회
+
+-- select *, pkey, birth   # 모든 컬럼, pkey, birth
+select min(birth)   # max()
+from `user`
+-- where pkey=4;   # =, >=
+-- where `name`='name1' and email='cose';   # 문장과 문장을 비교
+where `name`='name1' or email='co9e';
+-- where year(birth) = '2004';   # 2004년생 - year:년도, month:월, day:일
+-- where month(birth)>=4 and month(birth)<=6;   # 2분기 생일자 (범위 데이터)
+
+-- group by
+-- order by
 
 # Update Statement
 UPDATE `test01`.`user`
@@ -37,3 +49,20 @@ DELETE FROM `test01`.`user`
 WHERE pkey=5;   # unique한 값 
 
 drop table `user`;   # 테이블 삭제
+
+# visual paradigm
+DROP TABLE IF EXISTS `user`;
+
+CREATE TABLE `user` (
+PKey int(4) NOT NULL AUTO_INCREMENT, 
+`name` varchar(50), 
+pwd varchar(100), 
+birth date, 
+profileImage varchar(255), 
+email varchar(100), 
+insertDate datetime DEFAULT now() NOT NULL, 
+updateDate datetime NULL, 
+PRIMARY KEY (PKey),
+UNIQUE INDEX (PKey)
+);
+

@@ -1,527 +1,164 @@
-use test01;
+use `database`;
 
-# 테이블 생성 쿼리
-CREATE TABLE board (pkey int(4) NOT NULL AUTO_INCREMENT, title varchar(255), `subject` text, writer int(4) NOT NULL, view_count int(4) DEFAULT 0 NOT NULL, `status` int(1) DEFAULT 0 NOT NULL comment '-2 delete
-
+## 테이블 생성
+CREATE TABLE Board (PKey int(4) NOT NULL AUTO_INCREMENT, title char(255), writer int(4) NOT NULL, anonymous int(1) DEFAULT 0 NOT NULL comment '0 - public
+1 - anonymous', `subject` text, createdDate datetime DEFAULT now() NOT NULL, updatedDate datetime NULL, readLevel int(1) DEFAULT 1 NOT NULL comment '글을 읽을 수 있는 레벨
+user 테이블의 level을 참고하여
+1 - 1 or more
+2 - 2 or more
+3 - 3 or more', postStatus int(1) DEFAULT 0 NOT NULL comment '-2 delete
 -1 block
-
 0 temp save
-
 1 appear
-
-2 disappear', insert_date datetime DEFAULT now() NOT NULL, update_date datetime NULL, PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
-
-CREATE TABLE board_img (pkey int(4) NOT NULL AUTO_INCREMENT, board_id int(4) NOT NULL, `name` varchar(255), `order` int(2), insert_date datetime DEFAULT now() NOT NULL, update_date datetime NULL, PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
-
-CREATE TABLE `like` (pkey int(4) NOT NULL AUTO_INCREMENT, user_id int(4) NOT NULL, content_id int(4) NOT NULL, `like` int(1), insert_date datetime DEFAULT now() NOT NULL, `type` int(1) comment '0 board
-
-1 reply', PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
-
-CREATE TABLE `profile` (pkey int(4) NOT NULL AUTO_INCREMENT, image varchar(255), `profile` varchar(500), `status` int(1) DEFAULT 0 NOT NULL comment '0 not using
-
-1 current using
-
-2 disappear
-
-3 delete', user_fkey int(4) NOT NULL, insert_date datetime DEFAULT now() NOT NULL, update_date datetime NULL, PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
-
-CREATE TABLE reply (pkey int(4) NOT NULL AUTO_INCREMENT, board_id int(4) NOT NULL, parent_id int(4) NOT NULL, writer int(4) NOT NULL, reply varchar(500), `status` int(1) DEFAULT 1 NOT NULL comment '-2 delete
-
+2 disappear', viewCount int(4) DEFAULT 0 NOT NULL comment '조회수', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE BoardImage (PKey int(4) NOT NULL AUTO_INCREMENT, boardID int(4) DEFAULT 0 NOT NULL, commentID int(4), `name` varchar(255), `order` int(2), insertDate datetime DEFAULT now() NOT NULL, updateDate datetime NULL, PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE `Comment` (PKey int(4) NOT NULL AUTO_INCREMENT, writer int(4) NOT NULL, anonymous int(1) DEFAULT 1 comment '0 - public
+1 - anonymous', `subject` varchar(500), createdDate datetime DEFAULT now() NOT NULL, updatedDate datetime NULL, boardFKey int(4) NOT NULL comment '댓글이 속한 게시글 참조', parentFKey int(4) NOT NULL comment '대댓글이 속한 상위 댓글', postStatus int(1) DEFAULT 1 NOT NULL comment '-2 delete
 -1 block
-
-0 temp save
-
 1 appear
+2 disappear', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE `Like` (PKey int(4) NOT NULL AUTO_INCREMENT, userID int(4) DEFAULT 0 NOT NULL, contentID int(4) DEFAULT 0 NOT NULL comment '게시글 아이디', commentID int(4) comment '댓글 아이디', `like` int(1), insertDate datetime DEFAULT now() NOT NULL, `type` int(1), PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE `Profile` (PKey int(4) NOT NULL AUTO_INCREMENT, imageName varchar(255), profileMassage varchar(500), `status` int(1) NOT NULL comment '0 not using
+1 using
+2 no exposure (only see me)
+3 delete status (not real deleted)', userFKey int(4) NOT NULL, insertDate datetime DEFAULT now() NOT NULL, updateDate datetime NULL, PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE SNSType (PKey int(1) NOT NULL AUTO_INCREMENT, `name` varchar(50) comment 'Kakao, Google, Instagram, Facebook, Naver ...', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE `User` (PKey int(4) NOT NULL AUTO_INCREMENT, `name` char(50), birth date, gender int(1) comment 'null - null, private
+0 - female
+1 - male', genderPrivate int(1) DEFAULT 0 NOT NULL comment '0은 공개
+1은 비공개', phoneNumber varchar(15), email varchar(200), emailCertification int(1) DEFAULT 0 NOT NULL comment '0은 not yet
+1은 certificated', emailCertificatedDate datetime NULL, id char(50) comment 'null은 sns가입 시', pwd char(150), pwd2 char(150), pwdHint char(30), pwdAnswer varchar(200), dateChangedPWD datetime NULL, marketing int(1) NOT NULL comment '마케팅동의 여부
+0 - agree
+1 - disagree', smsMarketing int(1) comment 'null은 동의
+0은 비동의', appMarketing int(1) comment 'null은 동의
+0은 비동의', emailMarketing int(1) comment 'null은 동의
+0은 비동의', joinDate datetime DEFAULT now() NOT NULL, updateDate datetime NULL, lastestActivityDate datetime DEFAULT now() NOT NULL, privacyUsageDate datetime NULL, privacyUsageVersion int(1) DEFAULT 23.2 NOT NULL comment '개인정보이용동의 내용 버전', `status` int(1) DEFAULT 0 NOT NULL comment '가입상태
+-2는 탈퇴 (resign)
+-1은 차단 (block)
+0은 가입 전 (before register) - 이메일 미인증
+1은 가입완료 (register)
+2는 휴면 (sleep', `level` int(1) DEFAULT 1 NOT NULL comment '1 - level1
+2 - level2
+3 - level3
+.
+.
+.', snsKey varchar(50), snsType int(1) DEFAULT 1 NOT NULL, snsFirstLogin int(1) DEFAULT 0 NOT NULL comment 'sns 최초 로그인 여부
+0 - sns 로그인 안 함
+1 - first login
+2 - not first login', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
 
-2 disappear', insert_date datetime DEFAULT now() NOT NULL, update_date datetime NULL, PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
+## 데이터 추가
+# user 테이블에 snstype 참조키가 있기 때문에 먼저 insert
+# PKey는 자동 증가
+INSERT INTO `database`.`snstype` (`name`) VALUES ('Email');
+INSERT INTO `database`.`snstype` (`name`) VALUES ('Kakao');
+INSERT INTO `database`.`snstype` (`name`) VALUES ('Google');
+INSERT INTO `database`.`snstype` (`name`) VALUES ('Instagram');
+INSERT INTO `database`.`snstype` (`name`) VALUES ('Facebook');
+INSERT INTO `database`.`snstype` (`name`) VALUES ('Naver');
 
-CREATE TABLE sns_type (pkey int(1) NOT NULL AUTO_INCREMENT, `name` varchar(50) NOT NULL, PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
-
-CREATE TABLE `user` (pkey int(4) NOT NULL AUTO_INCREMENT, id varchar(50), `name` varchar(50), pwd varchar(100), birth date, profile_image varchar(255), email varchar(100), certificated_email int(1) DEFAULT 0 NOT NULL, certificated_date datetime NULL, gender int(1) DEFAULT 0 NOT NULL comment '0 nothing 1 women 2 men', sns_key varchar(50), sns_type int(1) NOT NULL, insert_date datetime DEFAULT now() NOT NULL, update_date datetime NULL, latest_login_date datetime NULL, privacy_ok_date datetime NULL, privacy_version int(1), `status` int(1) DEFAULT 0 NOT NULL comment '-2 resign
-
--1 block
-
-0 before regist
-
-1 regist
-
-2 sleep', PRIMARY KEY (pkey), UNIQUE INDEX (pkey));
-
-INSERT INTO `sns_type`(`name`)VALUES('email');
-INSERT INTO `sns_type`(`name`)VALUES('kakao');
-INSERT INTO `sns_type`(`name`)VALUES('naver');
-INSERT INTO `sns_type`(`name`)VALUES('google');
-
+# 유저 6명 추가(아이디 가입)
 # 다 다르게 insert하기
-INSERT INTO `user`(`id`,`name`,`pwd`,`birth`,`email`,`gender`,`sns_type`,`status`)VALUES("id01","name01","pwd01","2000-02-03","email01@naver.com",1,1,1);
-INSERT INTO `user`(`id`,`name`,`pwd`,`birth`,`email`,`gender`,`sns_type`,`status`)VALUES("id02","name02","pwd02","2010-04-20","email02@naver.com",2,1,1);
-INSERT INTO `user`(`id`,`name`,`pwd`,`birth`,`email`,`gender`,`sns_type`,`status`)VALUES("id03","name03","pwd03","2020-06-10","email03@naver.com",1,1,-1);
-INSERT INTO `user`(`id`,`name`,`pwd`,`birth`,`email`,`gender`,`sns_type`,`status`)VALUES("id04","name04","pwd04","2020-06-10","email04@naver.com",1,1,1);
-INSERT INTO `user`(`id`,`name`,`pwd`,`birth`,`email`,`gender`,`sns_type`,`status`)VALUES("id05","name05","pwd05","2020-06-10","email05@naver.com",2,1,-1);
-INSERT INTO `user`(`sns_key`,`sns_type`,`status`)VALUES('adqdxf12g45d7623wdf345', 4, 1);
-INSERT INTO `user`(`sns_key`,`sns_type`,`status`)VALUES('cxs3f52f64gh753fg56434', 3, 1);
-INSERT INTO `user`(`sns_key`,`sns_type`,`status`)VALUES('j5tgn5ghvb234fgdds45f4', 2, 1);
-INSERT INTO `user`(`sns_key`,`sns_type`,`status`)VALUES('hntfcdfgf34dfg65223s21', 3, 1);
-INSERT INTO `user`(`sns_key`,`sns_type`,`status`)VALUES('aasdf134dfg46fgvcxd354', 2, 1);
+INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
+VALUES("Cordell","1982-8-23",1,"010-4610-6033","cicef56437@saeoil.com","zpcirdf","OMDyMkRu",0, 1);
+INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
+VALUES("Gabriel","1973-10-15",1,"010-5445-0589","vibiran958@saeoil.com","p9v59eu","sjRwxIhy",1, 1);
+INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
+VALUES("Alexandro","2007-4-20",0,"010-7950-6803","bodogar948@pixiil.com","h51fi0a","LtIeBdBj",1, 1);
+INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
+VALUES("Mustafa","1979-9-4",0,"010-8915-3691","tomen79492@pixiil.com","5t4iuw6","uvJRo3TR",1, 1);
+INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
+VALUES("Markus","1976-2-19",1,"010-4142-5881","miyowa6044@pixiil.com","gpp2ujm","RfcoPggv",1, -1);
+INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
+VALUES("Omer","2001-5-23",0,"010-2845-2043","xacora2844@soombo.com","ofz5k85","zezC2p5k",0, 2);
 
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title01","subject01",3,100000,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title02","subject0",3,9232,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title03","subject0",2,50,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title04","subject0",3,354,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title05","subject0",6,34,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title06","subject0",7,20,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title07","subject0",7,530,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title08","subject0",8,254,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title09","subject0",10,233,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title10","subject10",8,123,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title11","subject11",7,523,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title12","subject12",6,20,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title13","subject13",2,16,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title14","subject14",1,14,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title15","subject15",2,12,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title16","subject16",3,15,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title17","subject17",2,12,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title18","subject18",4,11,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title19","subject19",6,100,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title20","subject20",7,13,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title21","subject21",10,1220,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title22","subject22",9,1042,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title23","subject23",9,10123,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title24","subject24",8,1009,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title25","subject25",8,10232,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title26","subject26",7,10132,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title27","subject27",6,105232,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title28","subject28",2,10123,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title29","subject29",3,6334,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title30","subject30",1,8434,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title31","subject31",7,8942,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title32","subject32",8,1021,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title33","subject33",9,982,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title34","subject34",10,1232,-1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title35","subject35",9,852,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title36","subject36",8,433,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title37","subject37",7,634,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title38","subject38",6,841,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title39","subject39",8,10002,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title40","subject40",7,1232,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title41","subject41",2,6443,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title42","subject42",3,965,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title43","subject43",1,9452,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title44","subject44",3,8421,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title45","subject45",4,132,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title46","subject46",2,74454,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title47","subject47",1,13422,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title48","subject48",6,8565,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title49","subject49",7,9765,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title50","subject50",8,54694,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title51","subject51",10,23,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title52","subject52",9,13,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title53","subject53",10,10,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title54","subject54",9,9,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title55","subject55",10,5,-1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title56","subject56",10,1312,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title57","subject57",9,105343,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title58","subject58",10,4310,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title59","subject59",7,1340,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title61","subject61",2,53410,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title62","subject62",3,234310,-1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title63","subject63",1,6310,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title64","subject64",3,6110,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title65","subject65",4,120,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title66","subject66",2,210,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title67","subject67",1,410,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title68","subject68",1,150,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title69","subject69",2,510,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title71","subject71",3,120,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title72","subject72",4,34410,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title73","subject73",7,1560,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title74","subject74",1,150,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title75","subject75",2,150,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title76","subject76",9,130,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title77","subject77",10,3110,-1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title78","subject78",8,110,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title79","subject79",6,5210,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title81","subject81",3,8410,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title82","subject82",4,2310,1);
-INSERT INTO `board`(`title`,`subject`,`writer`,`view_count`,`status`)VALUES("title83","subject83",2,12310,1);
+# 프로필 사진 추가
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("262409.jpg",1,1);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("921815.png",0,2);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("892870.png",1,3);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("488246.png",0,4);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("539162.png",0,5);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("749264.png",1,6);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("165483.png",1,2);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("418471.png",0,4);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("82542.png",1,5);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("40852.png",1,4);
 
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(1, 0, 0, 'reply01', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(1, 1, 0, 'reply02', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(1, 1, 0, 'reply03', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(2, 0, 0, 'reply04', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(3, 0, 0, 'reply05', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(4, 0, 0, 'reply06', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply07', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 7, 0, 'reply08', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply09', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 9, 0, 'reply10', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 10, 0, 'reply11', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 9, 0, 'reply12', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply13', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply14', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply15', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply16', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply17', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply18', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply20', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply21', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply22', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply23', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(1, 0, 0, 'reply24', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(1, 0, 0, 'reply25', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(2, 0, 0, 'reply26', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(3, 0, 0, 'reply27', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(4, 0, 0, 'reply28', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply30', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(6, 0, 0, 'reply31', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(7, 0, 0, 'reply32', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(9, 0, 0, 'reply33', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(10, 0, 0, 'reply34', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(11, 0, 0, 'reply35', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(10, 0, 0, 'reply36', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(11, 0, 0, 'reply37', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(10, 0, 0, 'reply38', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(9, 0, 0, 'reply40', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(8, 0, 0, 'reply41', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(20, 0, 0, 'reply42', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(30, 0, 0, 'reply43', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(31, 0, 0, 'reply44', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(31, 0, 0, 'reply45', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply46', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(33, 0, 0, 'reply47', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(34, 0, 0, 'reply48', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(53, 0, 0, 'reply50', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply51', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(45, 0, 0, 'reply52', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply53', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(21, 0, 0, 'reply54', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(21, 0, 0, 'reply55', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply56', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(31, 0, 0, 'reply57', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(31, 0, 0, 'reply58', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(31, 0, 0, 'reply60', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply61', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(42, 0, 0, 'reply62', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply63', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(6, 0, 0, 'reply64', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(76, 0, 0, 'reply65', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(55, 0, 0, 'reply66', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(56, 0, 0, 'reply67', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply68', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply70', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply71', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(42, 0, 0, 'reply72', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply73', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(67, 0, 0, 'reply74', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply75', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(73, 0, 0, 'reply76', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(62, 0, 0, 'reply77', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply78', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(34, 0, 0, 'reply80', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(64, 0, 0, 'reply81', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(73, 0, 0, 'reply82', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(43, 0, 0, 'reply83', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(56, 0, 0, 'reply84', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(23, 0, 0, 'reply85', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(2, 0, 0, 'reply86', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(3, 0, 0, 'reply87', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply88', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(7, 0, 0, 'reply90', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(8, 0, 0, 'reply91', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply92', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply93', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(45, 0, 0, 'reply94', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(22, 0, 0, 'reply95', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(22, 0, 0, 'reply96', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply97', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply98', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(51, 0, 0, 'reply99', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply100', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply101', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply102', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply103', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(63, 0, 0, 'reply104', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(71, 0, 0, 'reply105', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(71, 0, 0, 'reply106', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(71, 0, 0, 'reply107', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(23, 0, 0, 'reply108', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply109', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply110', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(42, 0, 0, 'reply111', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply112', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply113', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply114', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(13, 0, 0, 'reply115', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply116', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(11, 0, 0, 'reply117', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(10, 0, 0, 'reply118', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(10, 0, 0, 'reply119', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(10, 0, 0, 'reply120', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(9, 0, 0, 'reply121', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(21, 0, 0, 'reply122', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(2, 0, 0, 'reply123', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(5, 0, 0, 'reply124', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(7, 0, 0, 'reply125', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply126', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply127', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply128', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply129', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply130', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(68, 0, 0, 'reply131', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply132', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(42, 0, 0, 'reply133', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply134', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(73, 0, 0, 'reply135', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply136', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(22, 0, 0, 'reply137', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply138', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(42, 0, 0, 'reply139', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply140', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply141', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply142', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply143', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply144', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply145', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(31, 0, 0, 'reply146', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(21, 0, 0, 'reply147', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(23, 0, 0, 'reply148', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(32, 0, 0, 'reply149', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(21, 0, 0, 'reply150', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(12, 0, 0, 'reply151', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(52, 0, 0, 'reply152', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(73, 0, 0, 'reply153', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply154', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(79, 0, 0, 'reply155', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(78, 0, 0, 'reply156', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(77, 0, 0, 'reply157', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(77, 0, 0, 'reply158', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(76, 0, 0, 'reply159', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(65, 0, 0, 'reply160', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(72, 0, 0, 'reply161', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(76, 0, 0, 'reply162', 1);
-INSERT INTO `reply`(`board_id`,`parent_id`,`writer`,`reply`,`status`)VALUES(73, 0, 0, 'reply163', 1);
+# 게시글 추가
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("카페에서 어제 산 커피",1,"플라스틱 컵 씻어서 다시 커피 담아도 되나?ㅋㅋ 세균 번식했으려나",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("헐 나 지금 알았는데",2,"해품달이랑 킬미힐이 쓰신 진수완 작가님 우리 학교 선배님이었어..",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("내일 시험 끝나고 첫 수업인데",3,"영화 보는거죠? 과자 뭐 챙겨가지",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("제시라는 이름에는 무슨 성이 제일 잘 어울려?",4,"김제시, 박제시 뭐 이런 거 있잖아. 아무거나 던져줘봐",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("와 나는 진짜 답이 없다.",5,"페트병 버리러 나와서 페트병 말고 핸드폰 버리고 옴. 진짜 한참 찾았네",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("집순이의 기준이 뭐임?",2,"슈퍼가 안 가고 집에만 있는거? 아님 동네 아니면 안 돌아다니는거? 아님 친구들 안 만나는거?",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("퉁퉁이 엄마 이름 모퉁이래 ㅋㅋㅋㅋㅋㅋ",1,"진짜 웃겨ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("나 지금 중국집에서 혼밥 중인데 웃음 참고있어 도와줘",6,"주인 분이 전화받더니 짜장밥에 짜장이 안 갔다구요?함ㅋㅋㅋㅋ",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("우리 강아지 오늘 역대급.. 72번 불렀는데 안 옴",3,"날 뭐로 보는 걸까",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("연기파배우 실력파가수 진짜 웃기지 않냐ㅋㅋ",4,"요리파 주방장도 나올 기세",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("덕우들은",5,"한글 영어 제외하고 개인적으로 가장 매력적인 언어가 뭐라고 생각해?",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("다비치 의리 있다",6,"약속 지키네 언니들 사랑해요",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("강아지 보다가 버스 놓침",5,"주인분이 어이쿠하며 다음 버스 올 때까지 만지게 해주심 행복하다",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("아침에 인문대",1,"몇 시에 문 열어? 8시엔 열리나",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("우이천에 분수 나오는 거 알았어?",4,"나도 오늘 알았음",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("교정하고",1,"재발하는 경우 있어? 유지장치 잘 껴도",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("지금날씨",4,"어떤가요 선생님들..",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("오늘의 메뉴",2,"나오면 후기 좀 알려줄 사람",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("티빙 더디저트",4,"재밌다",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("오늘 날씨",6,"어제랑 비슷해?",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("자연광에서 찍는 사진이",5,"진심 잘 나온다",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("공차 뭐 마실까",4,"추천 좀!!!",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("여권발급",1,"보통 얼마나 걸리려나",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("도플갱어를 만나면 죽는다잖아..",2,"도플갱어 믿어?",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("치킨 주문한지 1시간",1,"지친다ㅎ",1);
 
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,1,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,1,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,1,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,1,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,1,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,1,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,1,5,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,1,5,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,1,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(9,1,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(10,1,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,2,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,2,5,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,2,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,2,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,3,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,3,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,3,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,4,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,4,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,4,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,5,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,5,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,5,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,5,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,5,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,5,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,5,5,0);
-
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,7,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,7,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,7,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,7,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,8,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,8,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,8,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(9,8,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,9,3,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,14,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,14,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,14,3,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,14,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,14,4,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,14,5,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,14,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,14,3,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,21,4,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,21,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,21,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,28,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(9,28,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,58,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,58,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,58,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,58,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,81,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(9,81,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(10,81,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,81,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,81,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,81,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,81,2,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,81,3,1);
-
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,6,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,6,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,6,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,6,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,6,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,7,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,7,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,7,5,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,8,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,8,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,8,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,8,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,8,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,10,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,10,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,10,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,10,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,10,1,1);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,43,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,42,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,35,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(9,79,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(10,51,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,42,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,67,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,67,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,67,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(8,34,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(10,43,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,43,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(6,43,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,43,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,43,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,74,3,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,74,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,75,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,54,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,54,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,54,4,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,64,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,64,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,64,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,64,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,64,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,67,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,67,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,67,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,67,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(9,58,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(4,58,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,58,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,58,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(7,77,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(5,77,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(3,77,1,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(2,77,2,0);
-INSERT INTO `like`(`user_id`,`content_id`,`like`,`type`)VALUES(1,77,4,0);
-
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image01','profile01',0,1);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image02','profile02',0,2);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image03','profile03',0,3);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image04','profile04',0,4);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image05','profile05',0,4);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image06','profile06',0,4);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image07','profile07',0,4);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image08','profile08',0,4);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image09','profile09',0,5);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image10','profile10',0,5);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image11','profile11',0,6);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image12','profile12',0,6);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image13','profile13',0,6);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image14','profile14',0,6);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image15','profile15',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image16','profile16',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image17','profile17',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image18','profile18',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image19','profile19',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image20','profile20',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image21','profile21',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image22','profile22',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image23','profile23',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image24','profile24',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image25','profile25',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image26','profile26',0,7);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image27','profile27',0,8);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image28','profile28',0,8);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image29','profile29',0,8);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image30','profile30',0,9);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image31','profile31',0,10);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image32','profile32',0,1);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image33','profile33',0,2);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image34','profile34',0,3);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image35','profile35',0,3);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image36','profile36',0,2);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image37','profile37',0,1);
-INSERT INTO `profile`(`image`,`profile`,`status`,`user_fkey`)VALUES('image38','profile38',0,1);
+## 댓글 대댓글 추가
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"뭐어때 내 눈에 안 보임(지나가던 바이오)",1,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"근데 세제로 씻으면 괜찮을듯?(지나가던 화학)",1,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"덕우의 마음이 편하면 그걸로 됐어(지나가던 심리)",1,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"그냥 새로 사~(지나가던 경영)",1,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"안돼~ 쟤 파산하면 어쩌려구(지나가던 국통)",1,4);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"국문과의 자랑!!",2,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"우와 대박이다. 킬미힐미 재밌었는데",2,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"헐 해품달이...? 대박이네",2,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"드라마화 하신 작가님이실걸? 원작 말고",2,8);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"맞아 드라마로 각본하신 거",2,8);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"맛동산이지",3,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"낼 영화 세얼간이 맞나요?",3,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"하울의 움직이는 성 아니에요?",3,12);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"또 세얼간이야?",3,12);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"선",4,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"ㅋㅋ선제시",4,15);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"ㅋㅋㅋ쓰레기통에 들어가서 찾음?",5,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"쓰레기통에서 하이 빅스비 외쳤다",5,17);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"어디야?하고 물어볼 가치도 없을때",6,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"그걸 셌어?",9,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"해외파 외국인",10,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"불어! 발음이 고급진 느낌",11,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"나도 그렇게 생각해!",11,23);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"연어...부드러워",11,0);
 
 
+## 조회 
 select * from `user`;
-## gender 기준 grouping(중복 제거)
--- select gender, min(sns_type) from `user` group by gender;   # grouping 기준과 같은 컬럼만 조회 -> sns 가입은 gender가 0으로 나오는 문제점 -> 0이면 sns_type이 최소 2
-
-## sns type에 따른 sns 출력
-# 암시적 조인
-select `user`.gender, `user`.sns_type, sns_type.`name` 
-from `user`, sns_type 
-where `user`.sns_type = sns_type.pkey;   # name으로 출력, sns_type과 name 맞추기
-# 서브쿼리로 구현
-select `name`, sns_type, 
-	(select `name` 
-    from `sns_type` 
-    where `user`.sns_type=sns_type.pkey
-    limit 1) as 'sns'
-from `user`;
-
-## 날짜 형식 바꾸기(나이 계산)
-select now();             # 현재 시간 출력, from 없어도 됨, 문자형
-select `name`, year(now())-year(`birth`) from `user` 
-where !isnull(`birth`);   # 올해 년도에서 빼기, null이 아닌 데이터(= where birth is not null)
-# 미성년자는 몇 명?(20 이하 개수)
-select count(pkey) from `user` 
-where !isnull(`birth`) and year(now())-year(`birth`)<20;   # -> 여러 번 검증하기
-
-## 최후 가입자 출력 (insert date 기준 정렬)
-select * from `user` order by pkey desc limit 1;   # pkey 오름차순(asc/desc), 첫번째 출력
-
-select * from `reply`;
-## 댓글과 대댓글(feat.별칭)
-select reply1.pkey as pkey1, reply1.board_id, reply1.parent_id, reply1.reply,   # 댓글
-	reply2.pkey as pkey2, reply2.board_id, reply2.parent_id, reply2.reply       # 대댓글
-from reply reply1, reply reply2         # 같은 테이블이지만 2개의 별칭으로 가져오기
-where reply1.pkey = reply2.parent_id;   # 댓글에 달린 대댓글 모아서 출력
-# parent_id를 pkey에 조인 (여러 번 가능. 여러 테이블에 참조할 수 있으므로)
-select reply1.pkey as pkey1, reply1.board_id, reply1.parent_id, reply1.reply,
-	reply2.pkey as pkey2, reply2.board_id, reply2.parent_id, reply2.reply 
-from reply reply1
-left join reply reply2 on reply1.pkey = reply2.parent_id
-where reply1.parent_id = 0;   # reply1에서 parent_id가 1 이상이면 대댓글이므로 조건절 넣기
-
-## user별 profile 출력 (feat.조인)
-select * from `profile`;
-select `user`.pkey, `user`.`name`, `profile`.`profile`, `profile`.image from `user`
-left join `profile` on `user`.pkey=`profile`.user_fkey;
-
-select * from `board`;
-select * from `like`;
-
-## 과제
+select * from `Profile`;
 ## 1. 최초에 가입한 유저와 가장 최근에 가입한 유저의 모든 정보를 출력
 select * from `user` where pkey=(select min(pkey) from `user`) or pkey=(select max(pkey) from `user`);
 ## 2. 모든 유저의 나이와, 평균 나이, 평균 나이 대비 몇 년 차이 나는지 출력
 ## ONLY_FULL_GROUP_BY 비활성화하기
+SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
 select year(now())-year(`birth`) as age, avg(year(now())-year(`birth`)) as avgAge, avg(year(now())-year(`birth`))-(year(now())-year(`birth`)) as difference from `user`;
 ## 3. 모든 유저의 모든 정보와 현재 사용 중인 프로필 이미지를 출력
-
+select `user`.*, `profile`.`imageName` as image from `user` left join `profile` on `user`.PKey=`profile`.userFKey where `profile`.`status`=1;
 ## 4. 현재 가입 중인 유저들 중 여성과 남성이 각각 몇 명인지 출력
-
+select (select count(gender) from `user` where gender = 0) as woman, (select count(gender) from `user` where gender = 1) as man from `user` limit 1;
 ## 5. 차단당한 유저의 마지막 글과 댓글들을 출력
-
+select board.PKey, board.writer, board.title, board.`subject`,
+	comment1.PKey as PKey1, comment1.parentFKey, comment1.`subject`,
+	comment2.PKey as PKey2, comment2.parentFKey, comment2.`subject`
+from `comment`, `user`
+left join board on `user`.PKey = `board`.writer
+left join `comment` comment1 on board.PKey = comment1.boardFKey
+left join `comment` comment2 on comment1.PKey = comment2.parentFKey
+where `user`.`status` = -1 and board.PKey=(select max(board.PKey) from board)
+group by board.PKey;
 ## 6. 가장 많은 글을 작성한 유저의 이름과 작성한 글의 개수 출력 (댓글X)

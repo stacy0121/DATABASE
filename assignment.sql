@@ -138,28 +138,35 @@ INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VA
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"연어...부드러워",11,0);
 
 
-## 조회 
+## 조회 쿼리
 select * from `user`;
+select * from `profile`;
 select * from `board`;
+select * from `comment`;
 ## 1. 최초에 가입한 유저와 가장 최근에 가입한 유저의 모든 정보를 출력
-# 정렬해서 limit 1?
-select * from `user` 
-where pkey=(select min(pkey) from `user`) or pkey=(select max(pkey) from `user`);
+select * 
+from `user` 
+where pkey=(select pkey from `user` order by joinDate asc limit 1) 
+	or pkey=(select pkey from `user` order by joinDate desc limit 1);
+
 ## 2. 모든 유저의 나이와, 평균 나이, 평균 나이 대비 몇 년 차이 나는지 출력
 select PKey, year(now())-year(`birth`) as age, 
 	(select avg(year(now())-year(`birth`)) from `user`) as avgAge,
 	(year(now())-year(`birth`)) - (select avg(year(now())-year(`birth`)) from `user`) as difference
 from `user`;
+
 ## 3. 모든 유저의 모든 정보와 현재 사용 중인 프로필 이미지를 출력
 select `user`.*, `profile`.`imageName` as image 
 from `user` 
 left join `profile` on `user`.PKey=`profile`.userFKey 
 where `profile`.`status`=1
 order by PKey asc;
+
 ## 4. 현재 가입 중인 유저들 중 여성과 남성이 각각 몇 명인지 출력
-select (select count(gender) from `user` where gender = 0) as woman, 
-	(select count(gender) from `user` where gender = 1) as man 
+select (select count(gender) from `user` where gender = 0 and `status` = 1) as woman, 
+	(select count(gender) from `user` where gender = 1 and `status` = 1) as man 
 from `user` limit 1;
+
 ## 5. 차단당한 유저의 마지막 글과 댓글들을 출력
 select board.PKey, board.writer, board.title, board.`subject`,
 	comment1.PKey as PKey1, comment1.parentFKey, comment1.`subject`,
@@ -168,9 +175,14 @@ from `user`
 left join board on `user`.PKey = `board`.writer
 left join `comment` comment1 on board.PKey = comment1.boardFKey
 left join `comment` comment2 on comment1.PKey = comment2.parentFKey
-where `user`.`status` = -1;
+where board.PKey=(select board.PKey 
+				from `user` 
+				left join board on `user`.PKey = `board`.writer 
+				where `user`.`status` = -1 
+				order by board.PKey desc limit 1) and (isnull(comment1.parentFKey) or comment1.parentFKey = 0);
+
 ## 6. 가장 많은 글을 작성한 유저의 이름과 작성한 글의 개수 출력 (댓글X)
-# `user`.`name`이 같은 것끼리 group by해서 count? sum?
-select `user`.`name`, (select count(*) from `board` group by `board`.writer order by count(*) desc limit 1) as post
+select `user`.PKey, `user`.`name`, (select count(*) from `board` where `user`.PKey=`board`.writer) as post
 from `user`
-left join board on `user`.PKey = `board`.writer;
+left join board on `user`.PKey = `board`.writer
+order by post desc limit 1;

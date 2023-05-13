@@ -1,6 +1,6 @@
 use `database`;
 
-## 테이블 생성
+## 테이블 생성 쿼리
 CREATE TABLE Board (PKey int(4) NOT NULL AUTO_INCREMENT, title char(255), writer int(4) NOT NULL, anonymous int(1) DEFAULT 0 NOT NULL comment '0 - public
 1 - anonymous', `subject` text, createdDate datetime DEFAULT now() NOT NULL, updatedDate datetime NULL, readLevel int(1) DEFAULT 1 NOT NULL comment '글을 읽을 수 있는 레벨
 user 테이블의 level을 참고하여
@@ -17,11 +17,11 @@ CREATE TABLE `Comment` (PKey int(4) NOT NULL AUTO_INCREMENT, writer int(4) NOT N
 -1 block
 1 appear
 2 disappear', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
-CREATE TABLE `Like` (PKey int(4) NOT NULL AUTO_INCREMENT, userID int(4) DEFAULT 0 NOT NULL, contentID int(4) DEFAULT 0 NOT NULL comment '게시글 아이디', commentID int(4) comment '댓글 아이디', `like` int(1), insertDate datetime DEFAULT now() NOT NULL, `type` int(1), PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+CREATE TABLE `Like` (PKey int(4) NOT NULL AUTO_INCREMENT, userID int(4) DEFAULT 0 NOT NULL, contentID int(4) DEFAULT 0 NOT NULL comment '게시글 아이디', commentID int(4) comment '댓글 아이디', `like` int(1), insertDate datetime DEFAULT now() NOT NULL, PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
 CREATE TABLE `Profile` (PKey int(4) NOT NULL AUTO_INCREMENT, imageName varchar(255), profileMassage varchar(500), `status` int(1) NOT NULL comment '0 not using
 1 using
 2 no exposure (only see me)
-3 delete status (not real deleted)', userFKey int(4) NOT NULL, insertDate datetime DEFAULT now() NOT NULL, updateDate datetime NULL, PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
+3 delete status (not real deleted)', userID int(4) NOT NULL, insertDate datetime DEFAULT now() NOT NULL, updateDate datetime NULL, PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
 CREATE TABLE SNSType (PKey int(1) NOT NULL AUTO_INCREMENT, `name` varchar(50) comment 'Kakao, Google, Instagram, Facebook, Naver ...', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
 CREATE TABLE `User` (PKey int(4) NOT NULL AUTO_INCREMENT, `name` char(50), birth date, gender int(1) comment 'null - null, private
 0 - female
@@ -47,7 +47,7 @@ CREATE TABLE `User` (PKey int(4) NOT NULL AUTO_INCREMENT, `name` char(50), birth
 1 - first login
 2 - not first login', PRIMARY KEY (PKey), UNIQUE INDEX (PKey));
 
-## 데이터 추가
+## 데이터 추가 쿼리
 # user 테이블에 snstype 참조키가 있기 때문에 먼저 insert
 # PKey는 자동 증가
 INSERT INTO `database`.`snstype` (`name`) VALUES ('Email');
@@ -58,7 +58,6 @@ INSERT INTO `database`.`snstype` (`name`) VALUES ('Facebook');
 INSERT INTO `database`.`snstype` (`name`) VALUES ('Naver');
 
 # 유저 6명 추가(아이디 가입)
-# 다 다르게 insert하기
 INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
 VALUES("Cordell","1982-8-23",1,"010-4610-6033","cicef56437@saeoil.com","zpcirdf","OMDyMkRu",0, 1);
 INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`, `id`, `pwd`,`marketing`, `status`)
@@ -73,16 +72,16 @@ INSERT INTO `database`.`user` (`name`, `birth`, `gender`, `phoneNumber`, `email`
 VALUES("Omer","2001-5-23",0,"010-2845-2043","xacora2844@soombo.com","ofz5k85","zezC2p5k",0, 2);
 
 # 프로필 사진 추가
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("262409.jpg",1,1);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("921815.png",0,2);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("892870.png",1,3);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("488246.png",0,4);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("539162.png",0,5);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("749264.png",1,6);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("165483.png",1,2);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("418471.png",0,4);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("82542.png",1,5);
-INSERT INTO `database`.`profile`(`imageName`,`status`,`userFKey`) VALUES("40852.png",1,4);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("262409.jpg",1,1);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("921815.png",0,2);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("892870.png",1,3);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("488246.png",0,4);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("539162.png",0,5);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("749264.png",1,6);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("165483.png",1,2);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("418471.png",0,4);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("82542.png",1,5);
+INSERT INTO `database`.`profile`(`imageName`,`status`,`userID`) VALUES("40852.png",1,4);
 
 # 게시글 추가
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("카페에서 어제 산 커피",1,"플라스틱 컵 씻어서 다시 커피 담아도 되나?ㅋㅋ 세균 번식했으려나",1);
@@ -111,7 +110,7 @@ INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("도플갱어를 만나면 죽는다잖아..",2,"도플갱어 믿어?",1);
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("치킨 주문한지 1시간",1,"지친다ㅎ",1);
 
-## 댓글 대댓글 추가
+# 댓글 대댓글 추가
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"뭐어때 내 눈에 안 보임(지나가던 바이오)",1,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"근데 세제로 씻으면 괜찮을듯?(지나가던 화학)",1,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"덕우의 마음이 편하면 그걸로 됐어(지나가던 심리)",1,0);
@@ -136,13 +135,10 @@ INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VA
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"불어! 발음이 고급진 느낌",11,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"나도 그렇게 생각해!",11,22);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"연어...부드러워",11,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"ㅋㅋㅋ그래도 다행이네",13,0);
 
 
 ## 조회 쿼리
-select * from `user`;
-select * from `profile`;
-select * from `board`;
-select * from `comment`;
 ## 1. 최초에 가입한 유저와 가장 최근에 가입한 유저의 모든 정보를 출력
 select * 
 from `user` 
@@ -158,7 +154,7 @@ from `user`;
 ## 3. 모든 유저의 모든 정보와 현재 사용 중인 프로필 이미지를 출력
 select `user`.*, `profile`.`imageName` as image 
 from `user` 
-left join `profile` on `user`.PKey=`profile`.userFKey 
+left join `profile` on `user`.PKey=`profile`.userID 
 where `profile`.`status`=1
 order by PKey asc;
 

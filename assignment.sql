@@ -98,7 +98,7 @@ INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("덕우들은",5,"한글 영어 제외하고 개인적으로 가장 매력적인 언어가 뭐라고 생각해?",1);
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("다비치 의리 있다",6,"약속 지키네 언니들 사랑해요",1);
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("강아지 보다가 버스 놓침",5,"주인분이 어이쿠하며 다음 버스 올 때까지 만지게 해주심 행복하다",1);
-INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("아침에 인문대",1,"몇 시에 문 열어? 8시엔 열리나",1);
+INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("아침에 인문대",3,"몇 시에 문 열어? 8시엔 열리나",1);
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("우이천에 분수 나오는 거 알았어?",4,"나도 오늘 알았음",1);
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("교정하고",1,"재발하는 경우 있어? 유지장치 잘 껴도",1);
 INSERT INTO `database`.`board`(`title`,`writer`,`subject`,`postStatus`) VALUES("지금날씨",4,"어떤가요 선생님들..",1);
@@ -117,48 +117,60 @@ INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VA
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"덕우의 마음이 편하면 그걸로 됐어(지나가던 심리)",1,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"그냥 새로 사~(지나가던 경영)",1,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"안돼~ 쟤 파산하면 어쩌려구(지나가던 국통)",1,4);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"국문과의 자랑!!",2,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"국문과의 자랑!!",2,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"우와 대박이다. 킬미힐미 재밌었는데",2,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"헐 해품달이...? 대박이네",2,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"드라마화 하신 작가님이실걸? 원작 말고",2,8);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"맞아 드라마로 각본하신 거",2,8);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"맛동산이지",3,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"낼 영화 세얼간이 맞나요?",3,0);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"하울의 움직이는 성 아니에요?",3,12);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"하울의 움직이는 성 아니에요?",3,12);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"또 세얼간이야?",3,12);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"선",4,0);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"ㅋㅋ선제시",4,15);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"ㅋㅋ선제시",4,15);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"ㅋㅋㅋ쓰레기통에 들어가서 찾음?",5,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"쓰레기통에서 하이 빅스비 외쳤다",5,17);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"어디야?하고 물어볼 가치도 없을때",6,0);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"그걸 셌어?",9,0);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"해외파 외국인",10,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"어디야?하고 물어볼 가치도 없을때",6,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"그걸 셌어?",9,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"해외파 외국인",10,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"불어! 발음이 고급진 느낌",11,0);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"나도 그렇게 생각해!",11,23);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"연어...부드러워",11,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"나도 그렇게 생각해!",11,22);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"연어...부드러워",11,0);
 
 
 ## 조회 
 select * from `user`;
-select * from `Profile`;
+select * from `board`;
 ## 1. 최초에 가입한 유저와 가장 최근에 가입한 유저의 모든 정보를 출력
-select * from `user` where pkey=(select min(pkey) from `user`) or pkey=(select max(pkey) from `user`);
+# 정렬해서 limit 1?
+select * from `user` 
+where pkey=(select min(pkey) from `user`) or pkey=(select max(pkey) from `user`);
 ## 2. 모든 유저의 나이와, 평균 나이, 평균 나이 대비 몇 년 차이 나는지 출력
-## ONLY_FULL_GROUP_BY 비활성화하기
-SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
-select year(now())-year(`birth`) as age, avg(year(now())-year(`birth`)) as avgAge, avg(year(now())-year(`birth`))-(year(now())-year(`birth`)) as difference from `user`;
+select PKey, year(now())-year(`birth`) as age, 
+	(select avg(year(now())-year(`birth`)) from `user`) as avgAge,
+	(year(now())-year(`birth`)) - (select avg(year(now())-year(`birth`)) from `user`) as difference
+from `user`;
 ## 3. 모든 유저의 모든 정보와 현재 사용 중인 프로필 이미지를 출력
-select `user`.*, `profile`.`imageName` as image from `user` left join `profile` on `user`.PKey=`profile`.userFKey where `profile`.`status`=1;
+select `user`.*, `profile`.`imageName` as image 
+from `user` 
+left join `profile` on `user`.PKey=`profile`.userFKey 
+where `profile`.`status`=1
+order by PKey asc;
 ## 4. 현재 가입 중인 유저들 중 여성과 남성이 각각 몇 명인지 출력
-select (select count(gender) from `user` where gender = 0) as woman, (select count(gender) from `user` where gender = 1) as man from `user` limit 1;
+select (select count(gender) from `user` where gender = 0) as woman, 
+	(select count(gender) from `user` where gender = 1) as man 
+from `user` limit 1;
 ## 5. 차단당한 유저의 마지막 글과 댓글들을 출력
 select board.PKey, board.writer, board.title, board.`subject`,
 	comment1.PKey as PKey1, comment1.parentFKey, comment1.`subject`,
-	comment2.PKey as PKey2, comment2.parentFKey, comment2.`subject`
-from `comment`, `user`
+	comment2.PKey as PKey2, comment2.parentFKey, comment2.`subject` 
+from `user`
 left join board on `user`.PKey = `board`.writer
 left join `comment` comment1 on board.PKey = comment1.boardFKey
 left join `comment` comment2 on comment1.PKey = comment2.parentFKey
-where `user`.`status` = -1 and board.PKey=(select max(board.PKey) from board)
-group by board.PKey;
+where `user`.`status` = -1;
 ## 6. 가장 많은 글을 작성한 유저의 이름과 작성한 글의 개수 출력 (댓글X)
+# `user`.`name`이 같은 것끼리 group by해서 count? sum?
+select `user`.`name`, (select count(*) from `board` group by `board`.writer order by count(*) desc limit 1) as post
+from `user`
+left join board on `user`.PKey = `board`.writer;

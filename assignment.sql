@@ -122,7 +122,7 @@ INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VA
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"헐 해품달이...? 대박이네",2,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(5,"드라마화 하신 작가님이실걸? 원작 말고",2,8);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(2,"맞아 드라마로 각본하신 거",2,8);
-INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"맛동산이지",3,0);
+INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(4,"맛동산이지",3,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(1,"낼 영화 세얼간이 맞나요?",3,0);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(6,"하울의 움직이는 성 아니에요?",3,12);
 INSERT INTO `database`.`comment`(`writer`,`subject`,`boardFKey`,`parentFKey`) VALUES(3,"또 세얼간이야?",3,12);

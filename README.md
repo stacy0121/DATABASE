@@ -1,5 +1,7 @@
 # DATABASE
-2023-1 데이터베이스응용 강의 강의 자료
+2023-1 데이터베이스응용 강의 기록
+
+[강의 메모]
 
 0327 ![image](https://user-images.githubusercontent.com/72933504/227840606-3b97a843-eb50-4ec1-a518-8962e16030ef.png)
 
